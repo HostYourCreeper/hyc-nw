@@ -86,10 +86,14 @@ function error(cmd)
 
 var create = function(message,c)
 {
+    var retour;
     var cmd = spawn(__dirname + '/create_image.sh',
             ['-n',message.vm_number, '-m', message.memory, '-o', message.options.ssh, '-b', message.options.backup, '-d', message.options.disk ]);
     cmd.stdout.on('data',function (data) {
-        var passwd = data.toString().split("\n");
+        retour += data.toString();
+    });
+    cmd.on('exit', function() {
+        var passwd = retour.split("\n");
         c.publish(process.env.npm_package_config_amqp_prod_queue, JSON.stringify({ command: 'create', vm_number: message.vm_number, root: passwd[0], mc: passwd[1], db: passwd[2], murmur: passwd[3] })); 
     });
     error(cmd);

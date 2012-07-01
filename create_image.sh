@@ -66,7 +66,7 @@ RETOUR=$(xen-create-image \
 --dist=squeeze \
 --gateway=$GATEWAY \
 --role=minecraft \
---role-args="$(mkpasswd ${PASSWORD}) $MEMORY $SHARED $DOMU_IP $BACKUP $DB_PASSWORD $MURMUR_PASSWORD $SSH" \
+--role-args="$(mkpasswd ${PASSWORD}) $MEMORY 0 $DOMU_IP $BACKUP $DB_PASSWORD $MURMUR_PASSWORD $SSH" \
 --size=$DISK \
 --memory=$VM_MEMORY)
 
@@ -83,4 +83,4 @@ echo "${MURMUR_PASSWORD}"
 
 touch /opt/firewall/vm/${NUMBER}
 
-/opt/firewall/firewall.sh restart
+FW=$(/opt/firewall/firewall.sh restart)

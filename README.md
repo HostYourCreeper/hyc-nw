@@ -1,5 +1,10 @@
 # HostYourCreeper Node Worker
 
+## Installation
+
+npm install
+npm start
+
 ## Configuration
 
 npm config set hyc-nw:amqp_host "localhost"
@@ -14,7 +19,7 @@ npm config set hyc-nw:amqp_prod_queue "myapp-cons"
 ### Installation
 
 message {
-  command : 'install',
+  command : 'create',
   vm_number : 11,
   memory : '1024',
   options : {
