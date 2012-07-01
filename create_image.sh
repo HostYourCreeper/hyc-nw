@@ -2,7 +2,7 @@
 
 usage()
 {
-    echo "Usage: $0 -n vm_number -m memory_size -s shared_memory_size -o ssh -b backup -d disk_space_added"
+    echo "Usage: $0 -n vm_number -m memory_size -o ssh -b backup -d disk_space_added"
     exit
 }
 
@@ -14,9 +14,6 @@ do
    ;;
   m)
    MEMORY=$OPTARG
-   ;;
-  s)
-   SHARED=$OPTARG
    ;;
   o)
    SSH=$OPTARG
@@ -35,11 +32,6 @@ done
 if [[ -z $MEMORY ]]
 then
     MEMORY=1024
-fi
-
-if [[ -z $SHARED ]]
-then
-    SHARED=256
 fi
 
 if [[ -z $SSH ]]
@@ -65,7 +57,7 @@ HOST="vm${NUMBER}"
 DOMU_IP="10.10.10.${NUMBER}"
 GATEWAY=$(echo $DOMU_IP | awk -F. '{print $1"."$2"."$3"."$4 + 127}')
 
-VM_MEMORY=$((${MEMORY}+128))M
+VM_MEMORY=${MEMORY}M
 
 RETOUR=$(xen-create-image \
 --hostname=$HOST \
@@ -78,23 +70,10 @@ RETOUR=$(xen-create-image \
 --size=$DISK \
 --memory=$VM_MEMORY)
 
-
 ROOT_PASS=$(echo $RETOUR | egrep -o 'Root Password.*' | awk '{print $4}')
 echo "${ROOT_PASS}"
 
-# Reglage du maxmem
 FILE=/etc/xen/${HOST}.cfg; 
-#GREP=$(grep maxmem $FILE); 
-#if [[ $SHARED == 768 ]]
-#then
-#  AWK=$(echo $GREP | awk -F\' '{print $1"'\''"$2+768"'\''"}');
-#elif [[ $SHARED == 1280 ]]
-#then
-#  AWK=$(echo $GREP | awk -F\' '{print $1"'\''"$2+1280"'\''"}');
-#else
-#  AWK=$(echo $GREP | awk -F\' '{print $1"'\''"$2+256"'\''"}');
-#fi
-#sed -e "s/${GREP}/${AWK}/g" -i $FILE
 
 RETOUR2=$(xm create ${FILE})
 

@@ -1,13 +1,11 @@
-var net = require('net'),
-    spawn = require('child_process').spawn,
+var spawn = require('child_process').spawn,
     fs = require('fs'),
-    async = require('async'),
-    available = true;
+    amqp = require('amqp');
 
 function date() {
   var _date = new Date();
   return _date.getDate() + "/" + (_date.getMonth()+1) + "/" + _date.getFullYear() + " " + _date.getHours() + ":" + _date.getMinutes();
-};
+}
 
 function trim (str) {
 	str = str.replace(/^\s+/, '');
@@ -20,151 +18,145 @@ function trim (str) {
 	return str;
 }
 
-var server = net.createServer({ allowHalfOpen: false });
-server.listen(8124, function() { //'listening' listener
-  console.log('['+ date() +'] server bound');
+var connection = amqp.createConnection({ 
+    host: process.env.npm_package_config_amqp_host,
+    login : process.env.npm_package_config_amqp_user,
+    password: process.env.npm_package_config_amqp_pass,
+    vhost: process.env.npm_package_config_amqp_vhost
 });
-server.on('connection',function(c) {
-  c.on('end', function() {
-    console.log('['+ date() + '] client disconnected');
+// Wait for connection to become established.
+connection.on('ready', function () {
+  connection.queue(process.env.npm_package_config_amqp_cons_queue, 
+    {durable: true, autoDelete: false},
+    function(q){
+        console.log('queue '+process.env.npm_package_config_amqp_cons_queue+' connected');
+      // Catch all messages
+      q.bind('#');
+
+      // Receive messages
+      q.subscribe(function (message) {
+          console.log(JSON.parse(message.data));
+        // Print messages to stdout
+        handle(connection,JSON.parse(message.data));
+      });
+      q.on('error', function(err) { console.log(err); });
   });
-  c.on('connect', function() {
-    console.log('['+ date() + '] client connected');
+  
+  connection.queue(process.env.npm_package_config_amqp_prod_queue, 
+    {durable: true, autoDelete: false},
+    function(q){
+        console.log('queue '+process.env.npm_package_config_amqp_prod_queue+' connected');
+        q.on('error', function(err) { console.log(err); });
   });
-  c.on('data', function(buffer) {
-    var data = buffer.toString('ascii');
-    data = data.split("\n");
-    console.log('['+ date() + '] Data received : '+ data);
-    data = data[0].split(" ");
-    switch(data[0]) {
-      case 'ping':
-        c.write('pong\n');
-        c.end();
-        break;
-      case 'date':
-        c.write(date()+'\n');
-        c.end();
-        break;
+});
+connection.on('error',function(err) {
+    console.log(err);
+});
+
+var handle = function(c, message) {
+    console.log('['+ date() + '] Command received : '+ message.command);
+    switch(message.command) {
       case 'create':
-        if(!available)
-        {
-            c.end('Unavailable');
-            break;
-        }
-        available = false;
-        cmd = spawn('/opt/api/create_image.sh',['-n',data[1], '-m', data[2], '-s', data[3], '-o', data[4], '-b', data[5], '-d', data[6] ]);
-        sortie(cmd,c);
-        cmd.on('exit', function() {
-            available = true;
-            c.end();
-        });
+        create(message,c);
         break;
       case 'delete':
-        delete_image(data,c);
+        delete_image(message,c);
         break;
       case 'start':
-        start(data,c);
+        start(message,c);
         break;
       case 'stop':
-        stop(data,c);
+        stop(message,c);
         break;
       case 'password':
-        password(data,c);
+        password(message,c);
         break;
       default:
-        c.write('Unknown command !');
+        console.log('['+date()+'] stderr : Unknown command ' + message.command); 
         break;
     }
-  });
-});
-function sortie(cmd,c)
+};
+
+function error(cmd)
 {
-  cmd.stdout.on('data',function (data) {
-    c.write(data); 
-  });
   cmd.stderr.on('data',function (data) {
     console.log('['+date()+'] stderr : '+data);
   });
 }
+
+var create = function(message,c)
+{
+    var cmd = spawn(__dirname + '/create_image.sh',
+            ['-n',message.vm_number, '-m', message.memory, '-o', message.options.ssh, '-b', message.options.backup, '-d', message.options.disk ]);
+    cmd.stdout.on('data',function (data) {
+        var passwd = data.toString().split("\n");
+        c.publish(process.env.npm_package_config_amqp_prod_queue, JSON.stringify({ command: 'create', vm_number: message.vm_number, root: passwd[0], mc: passwd[1], db: passwd[2], murmur: passwd[3] })); 
+    });
+    error(cmd);
+};
+
 var start = function(data,c)
 {
-    if(!data[1] || data[1] < 1)
-    {
+    if(!data.vm_number)
         console.log('['+date()+'] Invalid param');
-        c.end('Error');
-    }
     else
     {
-        cmd = spawn('xm',['create', "vm"+data[1]+".cfg" ]);
-        sortie(cmd,c);
-        cmd.on('exit', function() {
-            c.end();
-        });
+        var cmd = spawn('xm',['create', "vm"+data.vm_number+".cfg" ]);
+        error(cmd);
     }
-}
+};
 var stop = function(data,c)
 {
-    if(!data[1] || data[1] < 1)
-    {
+    if(!data.vm_number)
         console.log('['+date()+'] Invalid param');
-        c.end('Error');
-    }
     else
     {
-        cmd = spawn('xm',['destroy', "vm"+data[1] ]);
-        sortie(cmd,c);
-        cmd.on('exit', function() {
-            c.end();
-        });
+        var cmd = spawn('xm',['destroy', "vm"+data.vm_number]);
+        error(cmd);
     }
-}
+};
+
 var delete_image = function(data,c)
 {
-    if(!data[1] || data[1] < 1)
-    {
+    if(!data.vm_number)
         console.log('['+date()+'] Invalid param');
-        c.end('Error');
-    }
     else
     {
-        cmd = spawn('xm',['destroy', "vm"+data[1] ]);
-        sortie(cmd,c);
+        var cmd = spawn('xm',['destroy', "vm"+data.vm_number ]);
+        error(cmd);
         cmd.on('exit', function() {
-            cmd = spawn('xen-delete-image',["vm"+data[1] ]);
-            sortie(cmd,c);
+            cmd = spawn('xen-delete-image',["vm"+data.vm_number ]);
+            error(cmd);
             cmd.on('exit', function() {
-                fs.unlink("/opt/firewall/vm/"+data[1], function (err) {
+                fs.unlink("/opt/firewall/vm/"+data.vm_number, function (err) {
                   if (err) {
                     console.log('['+date()+'] Can\'t delete firewall file.');
-                    c.end('Error');
-                    } else { c.end(); }
+                    }
                 });
             });
         });
     }
-}
+};
 
-var password = function(data,c)
+var password = function(message,c)
 {
-    if(!data[1] || data[1] < 1)
-    {
+    if(!message.vm_number)
         console.log('['+date()+'] Invalid param');
-        c.end('Error');
-    }
     else
     {
         var passwd;
-        cmd = spawn('pwgen',['-s','12','1']);
+        var cmd = spawn('pwgen',['-s','12','1']);
         cmd.stdout.on('data',function (data) {
-            c.write(data);
-            passwd = trim(data+"");
+            passwd = trim(data.toString());
         });
+        error(cmd);
         cmd.on('exit', function() {
-            cmd = spawn('ssh',['root@10.10.10.'+data[1],'echo \"minecraft:'+passwd+'\" | chpasswd']);
-            sortie(cmd,c);
-            cmd.on('exit', function() {
-                c.end();
+            cmd = spawn('ssh',['root@10.10.10.'+message.vm_number,'echo \"minecraft:'+passwd+'\" | chpasswd']);
+            cmd.on('exit',function (code) {
+                if(code == 0)
+                    c.publish(process.env.npm_package_config_amqp_prod_queue, JSON.stringify({ command: 'password', vm_number: message.vm_number, passwd : passwd })); 
             });
+            error(cmd);
         });
     }
-}
+};
