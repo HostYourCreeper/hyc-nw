@@ -10,7 +10,8 @@
   },
   "main": "server.js",
   "dependencies": {
-     "amqp" : "*"
+     "amqp" : "*",
+     "forever" : "*"
   },
   "devDependencies": {},
   "optionalDependencies": {},
