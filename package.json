@@ -18,7 +18,7 @@
   "engines": {
     "node": "*"
   }
-  "scripts" : { "start" : "forever start server.js", },
+  "scripts" : { "start" : "forever start server.js" },
   "config" : { 
     "amqp_host" : "localhost",
     "amqp_user" : "myuser",
