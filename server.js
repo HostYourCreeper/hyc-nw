@@ -88,13 +88,13 @@ var create = function(message,c)
 {
     var retour;
     var cmd = spawn(__dirname + '/create_image.sh',
-            ['-n',message.vm_number, '-m', message.memory, '-o', message.options.ssh, '-b', message.options.backup, '-d', message.options.disk ]);
+            ['-n',message.vm_number, '-m', message.memory, '-b', message.options.backup, '-d', message.options.disk ]);
     cmd.stdout.on('data',function (data) {
         retour += data.toString();
     });
     cmd.on('exit', function() {
         var passwd = retour.split("\n");
-        c.publish(process.env.npm_package_config_amqp_prod_queue, JSON.stringify({ command: 'create', vm_number: message.vm_number, root: passwd[0], mc: passwd[1], db: passwd[2], murmur: passwd[3] })); 
+        c.publish(process.env.npm_package_config_amqp_prod_queue, JSON.stringify({ command: 'create', id: message.id, root: passwd[0], mc: passwd[1], db: passwd[2], murmur: passwd[3] })); 
     });
     error(cmd);
 };
@@ -158,7 +158,7 @@ var password = function(message,c)
             cmd = spawn('ssh',['root@10.10.10.'+message.vm_number,'echo \"minecraft:'+passwd+'\" | chpasswd']);
             cmd.on('exit',function (code) {
                 if(code == 0)
-                    c.publish(process.env.npm_package_config_amqp_prod_queue, JSON.stringify({ command: 'password', vm_number: message.vm_number, passwd : passwd })); 
+                    c.publish(process.env.npm_package_config_amqp_prod_queue, JSON.stringify({ command: 'password', id: message.id, passwd : passwd })); 
             });
             error(cmd);
         });

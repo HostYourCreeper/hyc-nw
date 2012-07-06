@@ -2,7 +2,7 @@
 
 usage()
 {
-    echo "Usage: $0 -n vm_number -m memory_size -o ssh -b backup -d disk_space_added"
+    echo "Usage: $0 -n vm_number -m memory_size -b backup -d disk_space_added"
     exit
 }
 
@@ -14,9 +14,6 @@ do
    ;;
   m)
    MEMORY=$OPTARG
-   ;;
-  o)
-   SSH=$OPTARG
    ;;
   b)
     BACKUP=$OPTARG
@@ -46,7 +43,7 @@ if [[ -z $DISK ]]
 then
     DISK=0
 fi
-DISK=$((${DISK}+6))Gb
+DISK=$((${DISK}+5))Gb
 
 
 PASSWORD=$(pwgen -s 12 1)
@@ -60,13 +57,15 @@ GATEWAY=$(echo $DOMU_IP | awk -F. '{print $1"."$2"."$3"."$4 + 127}')
 VM_MEMORY=${MEMORY}M
 
 RETOUR=$(xen-create-image \
+--install-method=tar \
+--install-source=/etc/xen-tools/base.tar \
 --hostname=$HOST \
 --ip=$DOMU_IP \
 --arch=amd64 \
 --dist=squeeze \
 --gateway=$GATEWAY \
---role=minecraft \
---role-args="$(mkpasswd ${PASSWORD}) $MEMORY 0 $DOMU_IP $BACKUP $DB_PASSWORD $MURMUR_PASSWORD $SSH" \
+--role=minecraft-hook \
+--role-args="$(mkpasswd ${PASSWORD}) $MEMORY $DOMU_IP $BACKUP $DB_PASSWORD $MURMUR_PASSWORD" \
 --size=$DISK \
 --memory=$VM_MEMORY)
 

@@ -20,10 +20,10 @@ npm config set hyc-nw:amqp_prod_queue "myapp-cons"
 
 message {
   command : 'create',
+  id : $commande_id,
   vm_number : 11,
   memory : '1024',
   options : {
-    ssh : 0,
     daily_backup : 0,
     six_hours_backup : 0,
     disk : 0
@@ -32,7 +32,7 @@ message {
 
 retour { 
   command: 'create',
-  vm_number: message.vm_number,
+  id: message.id,
   root: passwd[0],
   mc: passwd[1],
   db: passwd[2],
@@ -64,11 +64,12 @@ message {
 
 message {
   command : 'password',
+  id : $commande_id,
   vm_number : 11
 }
 
 retour {
   command : 'password',
-  vm_number: message.vm_number,
+  id: message.id,
   passwd : passwd
 }
