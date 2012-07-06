@@ -6,7 +6,7 @@ usage()
     exit
 }
 
-while getopts n:m:s:o:b:d: option
+while getopts n:m:b:d: option
 do
  case $option in
   n)
