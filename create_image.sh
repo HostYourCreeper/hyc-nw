@@ -43,7 +43,7 @@ if [[ -z $DISK ]]
 then
     DISK=0
 fi
-DISK=$((${DISK}+5))Gb
+DISK=${DISK}Gb
 
 
 PASSWORD=$(pwgen -s 12 1)
