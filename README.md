@@ -24,8 +24,7 @@ message {
   vm_number : 11,
   memory : '1024',
   options : {
-    daily_backup : 0,
-    six_hours_backup : 0,
+    backup : 0,
     disk : 0
   }
 }
