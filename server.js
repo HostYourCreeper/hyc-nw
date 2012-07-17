@@ -142,7 +142,10 @@ var delete_image = function(data,c)
             function(callback){
                 fs.unlink("/opt/firewall/vm/"+data.vm_number, function (err) {
                     var code = 0;
-                    if(err) code = -1;
+                    if(err) {
+                        code = -1;
+                        console.log('['+date()+'] err : '+err);
+                    }
                     callback(code, 'Firewall file deleted');
                 });
             },
