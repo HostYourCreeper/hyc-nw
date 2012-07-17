@@ -1,6 +1,7 @@
 var spawn = require('child_process').spawn,
     fs = require('fs'),
-    amqp = require('amqp');
+    amqp = require('amqp'),
+    async = require('async');
 
 function date() {
   var _date = new Date();
@@ -126,18 +127,40 @@ var delete_image = function(data,c)
         console.log('['+date()+'] Invalid param');
     else
     {
-        var cmd = spawn('xm',['destroy', "vm"+data.vm_number ]);
-        error(cmd);
-        cmd.on('exit', function() {
-            cmd = spawn('xen-delete-image',["vm"+data.vm_number ]);
-            error(cmd);
-            cmd.on('exit', function() {
-                fs.unlink("/opt/firewall/vm/"+data.vm_number, function (err) {
-                  if (err) {
-                    console.log('['+date()+'] Can\'t delete firewall file.');
-                    }
+        async.series([
+            function(callback){
+                var cmd = spawn('xm',['destroy', "vm"+data.vm_number ]);
+                error(cmd);
+                cmd.on('exit', function(code) {
+                    callback(code, 'VM '+data.vm_number+' destroyed.');
                 });
-            });
+            },
+            function(callback){
+                var cmd = spawn('xen-delete-image',["vm"+data.vm_number ]);
+                error(cmd);
+                cmd.on('exit', function(code) {
+                    callback(code, 'VM image '+data.vm_number+' deleted.');
+                });
+            },
+            function(callback){
+                fs.unlink("/opt/firewall/vm/"+data.vm_number, function (err) {
+                    var code = 0;
+                    if(err) code = -1;
+                    callback(code, 'Firewall file deleted');
+                });
+            },
+            function(callback){
+                var cmd = spawn("/opt/firewall/firewall.sh", ["restart"]);
+                error(cmd);
+                cmd.on('exit', function(code) {
+                    callback(code, 'Firewall restarted.');
+                });
+            }
+        ],
+        // optional callback
+        function(err, results){
+            if(err) console.log('['+date()+'] err : '+err);
+            console.log('['+date()+'] results : '+results);
         });
     }
 };
@@ -157,7 +180,7 @@ var password = function(message,c)
         cmd.on('exit', function() {
             cmd = spawn('ssh',['root@10.10.10.'+message.vm_number,'echo \"minecraft:'+passwd+'\" | chpasswd']);
             cmd.on('exit',function (code) {
-                if(code == 0)
+                if(code === 0)
                     c.publish(process.env.npm_package_config_amqp_prod_queue, JSON.stringify({ command: 'password', id: message.id, passwd : passwd })); 
             });
             error(cmd);
