@@ -1,4 +1,5 @@
 var spawn = require('child_process').spawn,
+    exec = require('child_process').exec,
     fs = require('fs'),
     amqp = require('amqp'),
     async = require('async');
@@ -129,11 +130,7 @@ var delete_image = function(data,c)
     {
         async.series([
             function(callback){
-                var cmd = spawn('xm',['destroy', "vm"+data.vm_number ]);
-                error(cmd);
-                cmd.on('exit', function(code) {
-                    callback(code, 'VM '+data.vm_number+' destroyed.');
-                });
+                exec('[[ $(xm list | grep vm'+data.vm_number+' | wc -l ) -gt 0 ]] ||  xm destroy vm'+data.vm_number,callback);
             },
             function(callback){
                 var cmd = spawn('xen-delete-image',["vm"+data.vm_number ]);
