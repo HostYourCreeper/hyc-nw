@@ -84,7 +84,13 @@ FILE=/etc/xen/${HOST}.cfg
 if [[ $SSD -gt 0 ]]
 then
     LVCREATE=$(lvcreate -L ${SSD}G -n ${HOST}-ssd vg_ssd)
+    mkfs.ext3 /dev/vg_ssd/${HOST}-ssd
     $(sed -i "19a 'phy:/dev/vg_ssd/${HOST}-ssd,xvda3,w'," ${FILE})
+    mkdir tmp/${HOST}
+    mount /dev/vg0/${HOST} tmp/${HOST}
+    echo "/dev/xvda3 /home/minecraft/ssd ext3 noatime,nodiratime,errors=remount-ro 0 1" >> tmp/${HOST}/etc/fstab
+    umount tmp/${HOST}
+    rmdir tmp/${HOST}
 fi
 
 RETOUR2=$(xm create ${FILE})
