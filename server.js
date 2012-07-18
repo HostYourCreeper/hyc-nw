@@ -1,6 +1,7 @@
 var spawn = require('child_process').spawn,
     exec = require('child_process').exec,
     fs = require('fs'),
+    path = require('path'),
     amqp = require('amqp'),
     async = require('async');
 
@@ -140,7 +141,7 @@ var delete_image = function(data,c)
                 });
             },
             function(callback){
-                fs.exists('/dev/vg_ssd/vm'+data.vm_number, function (exists) {
+                path.exists('/dev/vg_ssd/vm'+data.vm_number, function (exists) {
                   if(exists)
                     exec('lvremove -f /dev/vg_ssd/vm'+data.vm_number,callback);
                   else
