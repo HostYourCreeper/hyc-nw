@@ -130,13 +130,21 @@ var delete_image = function(data,c)
     {
         async.series([
             function(callback){
-                exec('[[ $(xm list | grep vm'+data.vm_number+' | wc -l ) -eq 0 ]] ||  xm destroy vm'+data.vm_number,callback);
+                exec('[ $(xm list | grep vm'+data.vm_number+' | wc -l ) -eq 0 ] ||  xm destroy vm'+data.vm_number,callback);
             },
             function(callback){
                 var cmd = spawn('xen-delete-image',["vm"+data.vm_number ]);
                 error(cmd);
                 cmd.on('exit', function(code) {
                     callback(code, 'VM image '+data.vm_number+' deleted.');
+                });
+            },
+            function(callback){
+                fs.exists('/dev/vg_ssd/vm'+data.vm_number, function (exists) {
+                  if(exists)
+                    exec('lvremove -f /dev/vg_ssd/vm'+data.vm_number,callback);
+                  else
+                    callback(null,'No SSD.');
                 });
             },
             function(callback){
