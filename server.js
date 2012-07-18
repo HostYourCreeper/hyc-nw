@@ -143,7 +143,7 @@ var delete_image = function(data,c)
             function(callback){
                 path.exists('/dev/vg_ssd/vm'+data.vm_number+'-ssd', function (exists) {
                   if(exists)
-                    exec('lvremove -f /dev/vg_ssd/vm'+data.vm_number,callback);
+                    exec('lvremove -f /dev/vg_ssd/vm'+data.vm_number+'-ssd',callback);
                   else
                     callback(null,'No SSD.');
                 });
