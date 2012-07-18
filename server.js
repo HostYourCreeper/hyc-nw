@@ -90,7 +90,7 @@ var create = function(message,c)
 {
     var retour;
     var cmd = spawn(__dirname + '/create_image.sh',
-            ['-n',message.vm_number, '-m', message.memory, '-b', message.options.backup, '-d', message.options.disk ]);
+            ['-n',message.vm_number, '-m', message.memory, '-b', message.options.backup, '-d', message.options.disk, '-s', message.options.ssd ]);
     cmd.stdout.on('data',function (data) {
         retour += data.toString();
     });

@@ -2,11 +2,11 @@
 
 usage()
 {
-    echo "Usage: $0 -n vm_number -m memory_size -b backup -d disk_space_added"
+    echo "Usage: $0 -n vm_number -m memory_size -b backup -d disk_space_added -s ssd"
     exit
 }
 
-while getopts n:m:b:d: option
+while getopts n:m:b:d:s: option
 do
  case $option in
   n)
@@ -20,6 +20,9 @@ do
    ;;
   d)
     DISK=$OPTARG
+   ;;
+  s)
+    SSD=$OPTARG
    ;;
   *) usage
    ;; 
@@ -42,6 +45,10 @@ fi
 if [[ -z $DISK ]]
 then
     DISK=0
+fi
+if [[ -z $SSD ]]
+then
+    SSD=0
 fi
 DISK=${DISK}Gb
 
@@ -72,13 +79,21 @@ RETOUR=$(xen-create-image \
 ROOT_PASS=$(echo $RETOUR | egrep -o 'Root Password.*' | awk '{print $4}')
 echo "${ROOT_PASS}"
 
-FILE=/etc/xen/${HOST}.cfg; 
+FILE=/etc/xen/${HOST}.cfg
+
+if [[ $SSD -gt 0 ]]
+then
+    LVCREATE=$(lvcreate -L ${SSD}G -n ${HOST}-ssd vg_ssd)
+    $(sed -i "19a 'phy:/dev/vg_ssd/${HOST}-ssd,xvda3,w'," ${FILE})
+fi
 
 RETOUR2=$(xm create ${FILE})
 
 echo "${PASSWORD}"
 echo "${DB_PASSWORD}"
 echo "${MURMUR_PASSWORD}"
+
+echo "$LVCREATE"
 
 touch /opt/firewall/vm/${NUMBER}
 
