@@ -72,3 +72,17 @@ retour {
   id: message.id,
   passwd : passwd
 }
+
+### Dedicated IP
+
+message {
+  command : 'dedicated_ip',
+  vm_number : 11,
+  ip: '127.0.0.1',
+}
+
+message {
+  command : 'dedicated_ip',
+  vm_number : 11,
+  ip: '',
+}

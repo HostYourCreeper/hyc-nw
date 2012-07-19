@@ -74,6 +74,9 @@ var handle = function(c, message) {
       case 'password':
         password(message,c);
         break;
+      case 'dedicated_ip':
+        dedicated_ip(message,c);
+        break;
       default:
         console.log('['+date()+'] stderr : Unknown command ' + message.command); 
         break;
@@ -193,6 +196,24 @@ var password = function(message,c)
                     c.publish(process.env.npm_package_config_amqp_prod_queue, JSON.stringify({ command: 'password', id: message.id, passwd : passwd })); 
             });
             error(cmd);
+        });
+    }
+};
+
+var dedicated_ip = function(message,c)
+{
+    if(!message.vm_number)
+        console.log('['+date()+'] Invalid param');
+    else
+    {
+        fs.writeFile('/opt/firewall/vm/'+message.vm_number,message.ip, function (err) {
+            if (err) console.log('['+date()+'] err : '+err);
+            console.log('['+date()+'] IP '+message.ip+' set to vm #'+message.vm_number+'.');
+            var cmd = spawn("/opt/firewall/firewall.sh", ["restart"]);
+            error(cmd);
+            cmd.on('exit', function(code) {
+                console.log('['+date()+'] Firewall restarted.');
+            });
         });
     }
 };
