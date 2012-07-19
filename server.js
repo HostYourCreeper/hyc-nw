@@ -101,6 +101,8 @@ var create = function(message,c)
     cmd.on('exit', function() {
         var passwd = retour.split("\n");
         c.publish(process.env.npm_package_config_amqp_prod_queue, JSON.stringify({ command: 'create', id: message.id, root: passwd[0], mc: passwd[1], db: passwd[2], murmur: passwd[3] })); 
+        if(message.options.ip)
+            dedicated_ip({vm_number: message.vm_number, ip: message.options.ip},c);
     });
     error(cmd);
 };

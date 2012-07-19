@@ -25,7 +25,8 @@ message {
   memory : '1024',
   options : {
     backup : 0,
-    disk : 0
+    disk : 0,
+    ip: '',
   }
 }
 
