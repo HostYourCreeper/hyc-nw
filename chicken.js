@@ -47,6 +47,7 @@ exports.delete_image = function(data,c)
         console.log('['+date()+'] Invalid param');
     else
     {
+        console.log('su srv'+data.vm_number+' -c "/home/srv'+data.vm_number+'/minecraft.sh stop"');
         exec('su srv'+data.vm_number+' -c "/home/srv'+data.vm_number+'/minecraft.sh stop"',function(err,result){
             if(err) console.log(err);
             var cmd = spawn('userdel',['-r', 'srv'+data.vm_number ]);
