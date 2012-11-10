@@ -56,7 +56,7 @@ exports.password = function(message,c)
         });
         error(cmd);
         cmd.on('exit', function() {
-            exec('echo "srv'+data.vm_number+':'+passwd+'" | chpasswd', function(err,result) {
+            exec('echo "srv'+message.vm_number+':'+passwd+'" | chpasswd', function(err,result) {
                 if(err) console.log(err);
                 else
                     c.publish(process.env.npm_package_config_amqp_prod_queue, 
