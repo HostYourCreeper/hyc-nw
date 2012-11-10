@@ -21,12 +21,24 @@ exports.create = function(message,c)
 
 exports.start = function(data,c)
 {
-    // Just start MC
+    if(!data.vm_number)
+        console.log('['+date()+'] Invalid param');
+    else {
+        exec('su srv'+data.vm_number+' -c "/home/srv'+data.vm_number+'/minecraft.sh start"',function(err,result){
+            if(err) console.log(err);
+        });
+    }
 };
 
 exports.stop = function(data,c)
 {
-    // Just stop MC
+    if(!data.vm_number)
+        console.log('['+date()+'] Invalid param');
+    else {
+        exec('su srv'+data.vm_number+' -c "/home/srv'+data.vm_number+'/minecraft.sh stop"',function(err,result){
+            if(err) console.log(err);
+        });
+    }
 };
 
 exports.delete_image = function(data,c)
@@ -35,10 +47,13 @@ exports.delete_image = function(data,c)
         console.log('['+date()+'] Invalid param');
     else
     {
-        var cmd = spawn('userdel',['-r', 'srv'+data.vm_number ]);
-        error(cmd);
-        cmd.on('exit', function() {
-            // OK
+        exec('su srv'+data.vm_number+' -c "/home/srv'+data.vm_number+'/minecraft.sh stop"',function(err,result){
+            if(err) console.log(err);
+            var cmd = spawn('userdel',['-r', 'srv'+data.vm_number ]);
+            error(cmd);
+            cmd.on('exit', function() {
+                // OK
+            });
         });
     }
 };
