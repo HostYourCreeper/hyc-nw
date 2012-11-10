@@ -4,7 +4,7 @@ var spawn = require('child_process').spawn,
 
 exports.create = function(message,c)
 {
-    var retour;
+    var retour = "";
     var cmd = spawn(__dirname + '/create_chicken.sh', ['srv'+message.vm_number]);
     cmd.stdout.on('data',function (data) {
         retour += data.toString();
@@ -13,8 +13,8 @@ exports.create = function(message,c)
         console.log(retour);
         c.publish(process.env.npm_package_config_amqp_prod_queue, 
             JSON.stringify({ command: 'create', 
-                id: message.id,
-                mc: 'azerty' })); 
+                id: message.id}));
+        exports.password(message,c);
     });
     error(cmd);
 };
@@ -65,6 +65,11 @@ exports.password = function(message,c)
         });
     }
 };
+
+
+exports.dedicated_ip = function(message,c) {
+
+}
 
 function date() {
   var _date = new Date();

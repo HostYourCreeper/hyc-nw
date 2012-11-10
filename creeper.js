@@ -5,9 +5,9 @@ var spawn = require('child_process').spawn,
     async = require('async');
 
 
-var create = function(message,c)
+exports.create = function(message,c)
 {
-    var retour;
+    var retour = "";
     var cmd = spawn(__dirname + '/create_image.sh',
             ['-n',message.vm_number, '-m', message.memory, '-b', message.options.backup, '-d', message.options.disk, '-s', message.options.ssd ]);
     cmd.stdout.on('data',function (data) {
@@ -22,7 +22,7 @@ var create = function(message,c)
     error(cmd);
 };
 
-var start = function(data,c)
+exports.start = function(data,c)
 {
     if(!data.vm_number)
         console.log('['+date()+'] Invalid param');
@@ -32,7 +32,7 @@ var start = function(data,c)
         error(cmd);
     }
 };
-var stop = function(data,c)
+exports.stop = function(data,c)
 {
     if(!data.vm_number)
         console.log('['+date()+'] Invalid param');
@@ -43,7 +43,7 @@ var stop = function(data,c)
     }
 };
 
-var delete_image = function(data,c)
+exports.delete_image = function(data,c)
 {
     if(!data.vm_number)
         console.log('['+date()+'] Invalid param');
@@ -94,7 +94,7 @@ var delete_image = function(data,c)
     }
 };
 
-var password = function(message,c)
+exports.password = function(message,c)
 {
     if(!message.vm_number)
         console.log('['+date()+'] Invalid param');
@@ -117,7 +117,7 @@ var password = function(message,c)
     }
 };
 
-var dedicated_ip = function(message,c)
+exports.dedicated_ip = function(message,c)
 {
     if(!message.vm_number)
         console.log('['+date()+'] Invalid param');

@@ -2,7 +2,7 @@
   "author": "Emilien Kenler <hello@emilienkenler.com> (http://www.emilienkenler.com)",
   "name": "hyc-nw",
   "description": "HostYourCreeper Node Worker",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "homepage": "http://www.hostyourcreeper.com",
   "repository": {
     "type": "git",
