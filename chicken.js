@@ -5,7 +5,7 @@ var spawn = require('child_process').spawn,
 exports.create = function(message,c)
 {
     var retour;
-    var cmd = spawn(__dirname + '/create_chicken.sh', [message.vm_number]);
+    var cmd = spawn(__dirname + '/create_chicken.sh', ['srv'+message.vm_number]);
     cmd.stdout.on('data',function (data) {
         retour += data.toString();
     });
