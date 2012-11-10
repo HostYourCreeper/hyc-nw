@@ -134,3 +134,10 @@ var dedicated_ip = function(message,c)
         });
     }
 };
+
+function error(cmd)
+{
+  cmd.stderr.on('data',function (data) {
+    console.log('['+date()+'] stderr : '+data);
+  });
+}
