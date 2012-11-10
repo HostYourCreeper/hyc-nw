@@ -18,7 +18,10 @@
   "engines": {
     "node": "*"
   },
-  "scripts" : { "start" : "forever start server.js" },
+  "scripts" : { 
+    "start" : "forever start server.js",
+    "start-test" : "node server.js"
+  },
   "config" : { 
     "creeper" : "1",
     "amqp_host" : "localhost",
