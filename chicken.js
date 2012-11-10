@@ -1,4 +1,5 @@
 var spawn = require('child_process').spawn,
+    exec = require('child_process').exec
     fs = require('fs');
 
 exports.create = function(message,c)
@@ -54,13 +55,12 @@ exports.password = function(message,c)
         });
         error(cmd);
         cmd.on('exit', function() {
-            cmd = spawn('echo',['\"srv'+data.vm_number+':'+passwd+'\" | chpasswd']);
-            cmd.on('exit',function (code) {
-                if(code == 0)
+            exec('echo "srv'+data.vm_number+':'+passwd+'" | chpasswd', function(err,result) {
+                if(err) console.log(err);
+                else
                     c.publish(process.env.npm_package_config_amqp_prod_queue, 
                         JSON.stringify({ command: 'password', id: message.id, passwd : passwd })); 
             });
-            error(cmd);
         });
     }
 };

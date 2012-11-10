@@ -13,6 +13,7 @@ npm config set hyc-nw:amqp_pass "mypass"
 npm config set hyc-nw:amqp_vhost "/myapp"
 npm config set hyc-nw:amqp_cons_queue "myapp-cons"
 npm config set hyc-nw:amqp_prod_queue "myapp-cons"
+npm config set hyc-nw:creeper 1
 
 ## Format des messages
 
