@@ -1,5 +1,5 @@
 var amqp = require('amqp');
-var is_creeper = process.env.npm_package_config_creeper || 1;
+var is_creeper = process.env.npm_package_config_creeper || 0;
 var server = (is_creeper == 1) ? require('creeper.js') : require('chicken.js');
 
 function date() {
