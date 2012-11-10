@@ -5,7 +5,7 @@ MC_USER=$1
 
 useradd -g minecraft -s /bin/bash -m ${MC_USER}
 chmod -R go-rwx /home/${MC_USER}
-JAVA=$(wget http://dl.hostyourcreeper.com/craftbukkit/craftbukkit.jar \
-  -O /home/${MC_USER}/minecraft/craftbukkit.jar)
+wget http://dl.hostyourcreeper.com/craftbukkit/craftbukkit.jar \
+  -O /home/${MC_USER}/minecraft/craftbukkit.jar >/dev/null 2>&1
 chown ${MC_USER}:minecraft /home/${MC_USER}/minecraft/craftbukkit.jar
 echo "Server installed"
