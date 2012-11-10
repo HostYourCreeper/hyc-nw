@@ -20,6 +20,7 @@
   },
   "scripts" : { "start" : "forever start server.js" },
   "config" : { 
+    "creeper" : "1",
     "amqp_host" : "localhost",
     "amqp_user" : "myuser",
     "amqp_pass" : "mypass",
