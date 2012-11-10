@@ -65,6 +65,11 @@ exports.password = function(message,c)
     }
 };
 
+function date() {
+  var _date = new Date();
+  return _date.getDate() + "/" + (_date.getMonth()+1) + "/" + _date.getFullYear() + " " + _date.getHours() + ":" + _date.getMinutes();
+}
+
 function error(cmd)
 {
   cmd.stderr.on('data',function (data) {
