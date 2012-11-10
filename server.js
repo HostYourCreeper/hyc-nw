@@ -71,6 +71,9 @@ var handle = function(c, message) {
       case 'password':
         server.password(message,c);
         break;
+      case 'dedicated_ip':
+        server.dedicated_ip(message,c);
+        break;
       default:
         console.log('['+date()+'] stderr : Unknown command ' + message.command); 
         break;
