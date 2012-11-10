@@ -10,6 +10,7 @@ exports.create = function(message,c)
         retour += data.toString();
     });
     cmd.on('exit', function() {
+        console.log(retour);
         c.publish(process.env.npm_package_config_amqp_prod_queue, 
             JSON.stringify({ command: 'create', 
                 id: message.id,
