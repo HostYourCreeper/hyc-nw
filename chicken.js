@@ -47,12 +47,14 @@ exports.delete_image = function(data,c)
         console.log('['+date()+'] Invalid param');
     else
     {
-        exec('su srv'+data.vm_number+' -c "/home/srv'+data.vm_number+'/minecraft.sh stop"',function(err,result){
+        var stop = exec('su srv'+data.vm_number+' -c "/home/srv'+data.vm_number+'/minecraft.sh stop"',function(err,result){
             if(err) console.log(err);
-            var cmd = spawn('userdel',['-r', 'srv'+data.vm_number ]);
+        });
+        stop.on('exit', function(){
+            var cmd = spawn('userdel',['-f', '-r', 'srv'+data.vm_number ]);
             error(cmd);
             cmd.on('exit', function() {
-                // OK
+                console.log('User srv'+data.vm_number+' deleted.');
             });
         });
     }
