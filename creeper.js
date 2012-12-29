@@ -2,7 +2,8 @@ var spawn = require('child_process').spawn,
     exec = require('child_process').exec,
     fs = require('fs'),
     path = require('path'),
-    async = require('async');
+    async = require('async'),
+    util = require('util');
 
 
 exports.create = function(message,c)
@@ -15,6 +16,7 @@ exports.create = function(message,c)
     });
     cmd.on('exit', function() {
         var passwd = retour.split("\n");
+        util.log(message.vm_number + ' - ' + retour);
         c.publish(process.env.npm_package_config_amqp_prod_queue, JSON.stringify({ command: 'create', id: message.id, root: passwd[0], mc: passwd[1], db: passwd[2], murmur: passwd[3] })); 
         if(message.options.ip)
             dedicated_ip({vm_number: message.vm_number, ip: message.options.ip},c);

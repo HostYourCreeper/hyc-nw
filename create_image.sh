@@ -78,24 +78,20 @@ RETOUR=$(xen-create-image \
 
 ROOT_PASS=$(echo $RETOUR | egrep -o 'Root Password.*' | awk '{print $4}')
 echo "${ROOT_PASS}"
+echo "${PASSWORD}"
+echo "${DB_PASSWORD}"
+echo "${MURMUR_PASSWORD}"
 
 FILE=/etc/xen/${HOST}.cfg
 
 if [[ $SSD -gt 0 ]]
 then
-    LVCREATE=$(lvcreate -L ${SSD}G -n ${HOST}-ssd vg_ssd)
-    mkfs.ext3 /dev/vg_ssd/${HOST}-ssd
-    $(sed -i "19a 'phy:/dev/vg_ssd/${HOST}-ssd,xvda3,w'," ${FILE})
+    lvcreate -L ${SSD}G -n ${HOST}-ssd vg_ssd >>/dev/null 2>&1
+    mkfs.ext3 /dev/vg_ssd/${HOST}-ssd >>/dev/null 2>&1
+    sed -i "19a 'phy:/dev/vg_ssd/${HOST}-ssd,xvda3,w'," ${FILE} >>/dev/null 2>&1
 fi
 
-RETOUR2=$(xm create ${FILE})
-
-echo "${PASSWORD}"
-echo "${DB_PASSWORD}"
-echo "${MURMUR_PASSWORD}"
-
-echo "$LVCREATE"
+xm create ${FILE} >>/dev/null 2>&1
 
 touch /opt/firewall/vm/${NUMBER}
-
-FW=$(/opt/firewall/firewall.sh restart)
+/opt/firewall/firewall.sh restart >>/dev/null 2>&1
