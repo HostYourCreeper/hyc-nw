@@ -89,6 +89,11 @@ then
     lvcreate -L ${SSD}G -n ${HOST}-ssd vg_ssd >>/dev/null 2>&1
     mkfs.ext3 /dev/vg_ssd/${HOST}-ssd >>/dev/null 2>&1
     sed -i "19a 'phy:/dev/vg_ssd/${HOST}-ssd,xvda3,w'," ${FILE} >>/dev/null 2>&1
+    
+    mkdir -p /mnt/ssd-install
+    mount /dev/vg_ssd/${HOST}-ssd /mnt/ssd-install/
+    chown -R 1000:1000 /mnt/ssd-install/
+    umount /mnt/ssd-install
 fi
 
 xm create ${FILE} >>/dev/null 2>&1
