@@ -41,6 +41,28 @@ exports.stop = function(data,c)
     }
 };
 
+exports.restart = function(data,c)
+{
+  if(!data.vm_number)
+    console.log('['+date()+'] Invalid param');
+  else {
+    exec('su srv'+data.vm_number+' -c "/home/srv'+data.vm_number+'/minecraft.sh restart"',function(err,result){
+      if(err) console.log(err);
+    });
+  }
+};
+
+exports.update = function(data,c)
+{
+  if(!data.vm_number)
+    console.log('['+date()+'] Invalid param');
+  else {
+    exec('su srv'+data.vm_number+' -c "/home/srv'+data.vm_number+'/minecraft.sh update"',function(err,result){
+      if(err) console.log(err);
+    });
+  }
+};
+
 exports.delete_image = function(data,c)
 {
     if(!data.vm_number)

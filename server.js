@@ -74,6 +74,16 @@ var handle = function(c, message) {
       case 'dedicated_ip':
         server.dedicated_ip(message,c);
         break;
+      case 'restart':
+        if(!is_creeper) {
+          server.restart(message,c);
+          break;
+        }
+      case 'update':
+        if(!is_creeper) {
+          server.update(message,c);
+          break;
+        }
       default:
         console.log('['+date()+'] stderr : Unknown command ' + message.command); 
         break;

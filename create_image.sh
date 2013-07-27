@@ -61,7 +61,7 @@ HOST="vm${NUMBER}"
 DOMU_IP="10.10.10.${NUMBER}"
 GATEWAY=$(echo $DOMU_IP | awk -F. '{print $1"."$2"."$3"."$4 + 127}')
 
-VM_MEMORY=${MEMORY}M
+VM_MEMORY=${MEMORY}Mb
 
 RETOUR=$(xen-create-image \
 --install-method=tar \
@@ -81,7 +81,7 @@ echo "${ROOT_PASS}"
 
 FILE=/etc/xen/${HOST}.cfg
 
-if [[ $SSD -gt 0 ]]
+if [[ -e /dev/vg_ssd && $SSD -gt 0 ]]
 then
     LVCREATE=$(lvcreate -L ${SSD}G -n ${HOST}-ssd vg_ssd)
     mkfs.ext3 /dev/vg_ssd/${HOST}-ssd
